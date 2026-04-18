@@ -22,7 +22,12 @@ export const createJob = async (req, res) => {
 // GET ALL JOBS
 export const getJobs = async (req, res) => {
   try {
-    const jobs = await Job.find().populate("createdBy", "name email");
+    const keyword = req.query.keyword || "";
+
+    const jobs = await Job.find({
+      title: { $regex: keyword, $options: "i" }
+    });
+
     res.json(jobs);
   } catch (error) {
     res.status(500).json({ message: "Server Error" });

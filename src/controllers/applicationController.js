@@ -58,3 +58,23 @@ export const getApplicants = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+export const updateStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const app = await Application.findById(req.params.id);
+
+    if (!app) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    app.status = status;
+    await app.save();
+
+    res.json({ message: "Status updated", app });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
