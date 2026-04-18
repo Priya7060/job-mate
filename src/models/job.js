@@ -14,4 +14,8 @@ const jobSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-export default mongoose.model("Job", jobSchema);
+//Ye check karta hai:
+// Agar model already bana hua hai → usi ko use karo
+// Nahi hai → naya bana lo
+const Job = mongoose.models.Job || mongoose.model("Job", jobSchema);
+export default Job;
