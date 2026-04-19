@@ -14,13 +14,16 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await API.post("/auth/login", form);
-
-      // store token
+      // store token aur role dono
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", res.data.user.role);
 
       alert("Login successful");
-      navigate("/dashboard");
-
+      if (res.data.user.role === "recruiter") {
+        navigate("/recruiter");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       alert(err.response.data.message);
     }
@@ -28,8 +31,8 @@ const Login = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input placeholder="Email" onChange={(e)=>setForm({...form, email:e.target.value})}/>
-      <input placeholder="Password" type="password" onChange={(e)=>setForm({...form, password:e.target.value})}/>
+      <input placeholder="Email" onChange={(e) => setForm({ ...form, email: e.target.value })} />
+      <input placeholder="Password" type="password" onChange={(e) => setForm({ ...form, password: e.target.value })} />
       <button type="submit">Login</button>
     </form>
   );

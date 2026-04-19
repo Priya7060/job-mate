@@ -7,9 +7,21 @@ const Home = () => {
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [loadingId, setLoadingId] = useState(null);
 
+  const role = localStorage.getItem("role");
+
   const searchJobs = async () => {
     const res = await API.get(`/jobs?keyword=${keyword}`);
     setJobs(res.data);
+  };
+
+  const fetchApplied = async () => {
+    try {
+      const res = await API.get("/applications/me");
+      const ids = res.data.map((app) => app.job._id.toString());
+      setAppliedJobs(ids);
+    } catch (err) {
+      console.log("Error fetching applied jobs:", err);
+    }
   };
 
   useEffect(() => {
@@ -18,13 +30,21 @@ const Home = () => {
       setJobs(res.data);
     };
     fetchJobs();
-    fetchApplied();
+
+    // sirf student ke liye applied jobs fetch karo
+    if (role === "student") {
+      fetchApplied();
+    }
   }, []);
 
   const applyJob = async (jobId) => {
-    try {
-     console.log("Applying job:",jobId);
+    // recruiter ko apply nahi karne denge
+    if (role === "recruiter") {
+      alert("Recruiters cannot apply for jobs!");
+      return;
+    }
 
+    try {
       setLoadingId(jobId);
       await API.post(`/applications/${jobId}`);
       alert("Applied successfully");
@@ -36,16 +56,10 @@ const Home = () => {
     }
   };
 
-  const fetchApplied = async () => {
-    const res = await API.get("/applications/me");
-    const ids = res.data.map(app => app.job._id);
-    setAppliedJobs(ids);
-  };
-
   return (
     <div>
       <h1>Jobs</h1>
-       
+
       <input
         placeholder="Search jobs..."
         onChange={(e) => setKeyword(e.target.value)}
@@ -59,11 +73,7 @@ const Home = () => {
       ) : (
         <div>
           {jobs.map((job) => {
-
-              console.log("Current job:", job._id);
-  console.log("Applied jobs:", appliedJobs);
-
-            const isApplied = appliedJobs.includes(job._id.toString()); 
+            const isApplied = appliedJobs.includes(job._id.toString());
             const isLoading = loadingId === job._id;
 
             return (
@@ -72,7 +82,9 @@ const Home = () => {
                 <p>{job.company}</p>
                 <p>{job.location}</p>
 
-                {isApplied ? (
+                {role === "recruiter" ? (
+                  <button disabled>Only students can apply</button>
+                ) : isApplied ? (
                   <button disabled>Applied ✅</button>
                 ) : (
                   <button onClick={() => applyJob(job._id)} disabled={isLoading}>
@@ -84,7 +96,6 @@ const Home = () => {
           })}
         </div>
       )}
-      
     </div>
   );
 };
