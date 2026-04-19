@@ -55,3 +55,13 @@ export const deleteJob = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+// GET MY JOBS (Recruiter only)
+export const getMyJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find({ createdBy: req.user.id });
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
