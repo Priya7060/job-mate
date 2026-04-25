@@ -6,6 +6,7 @@ const Home = () => {
   const [keyword, setKeyword] = useState("");
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [loadingId, setLoadingId] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const role = localStorage.getItem("role");
 
@@ -26,8 +27,15 @@ const Home = () => {
 
   useEffect(() => {
     const fetchJobs = async () => {
-      const res = await API.get("/jobs");
-      setJobs(res.data);
+      try {
+        setLoading(true);
+        const res = await API.get("/jobs");
+        setJobs(res.data);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchJobs();
 
@@ -55,20 +63,31 @@ const Home = () => {
       setLoadingId(null);
     }
   };
-
+  if (loading) return <h2>Loading jobs...</h2>;
   return (
-    <div>
+    <div className="max-w-6xl mx-auto p-8">
       <h1>Jobs</h1>
 
-      <input
-        placeholder="Search jobs..."
-        onChange={(e) => setKeyword(e.target.value)}
-      />
-      <button onClick={searchJobs}>Search</button>
+      <div className="flex gap-4 mb-8">
+
+        <input
+          className="border p-3 rounded w-full"
+          placeholder="Search jobs..."
+          onChange={(e) => setKeyword(e.target.value)}
+        />
+
+        <button
+          onClick={searchJobs}
+          className="bg-blue-600 text-white px-6 rounded"
+        >
+          Search
+        </button>
+
+      </div>
 
       {jobs.length === 0 ? (
         <p style={{ color: "red", fontWeight: "bold" }}>
-          No jobs found 😢
+          <h2>No Jobs Found 🔍</h2>
         </p>
       ) : (
         <div>
@@ -77,18 +96,37 @@ const Home = () => {
             const isLoading = loadingId === job._id;
 
             return (
-              <div key={job._id} style={{ border: "1px solid black", margin: "10px", padding: "10px" }}>
-                <h3>{job.title}</h3>
-                <p>{job.company}</p>
-                <p>{job.location}</p>
+              <div
+                key={job._id}
+                className="bg-white rounded-2xl shadow-md p-6 mb-6"
+              >
+                <h2>{job.title}</h2>
 
-                {role === "recruiter" ? (
-                  <button disabled>Only students can apply</button>
-                ) : isApplied ? (
-                  <button disabled>Applied ✅</button>
+                <p>
+                  <strong>Company:</strong> {job.company}
+                </p>
+
+                <p>
+                  <strong>Location:</strong> {job.location}
+                </p>
+
+                <p>
+                  <strong>Description:</strong> {job.description}
+                </p>
+
+                {isApplied ? (
+                  <button
+                    disabled
+                    className="bg-gray-400 text-white px-5 py-2 rounded-lg"
+                  >
+                    Applied ✓
+                  </button>
                 ) : (
-                  <button onClick={() => applyJob(job._id)} disabled={isLoading}>
-                    {isLoading ? "Applying..." : "Apply"}
+                  <button
+                    onClick={() => applyJob(job._id)}
+                    className="bg-green-600 text-white px-5 py-2 rounded-lg"
+                  >
+                    Apply
                   </button>
                 )}
               </div>
