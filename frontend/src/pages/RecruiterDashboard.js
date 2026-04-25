@@ -47,6 +47,30 @@ const RecruiterDashboard = () => {
     }
   };
 
+  //UPdate status :pending , accepted, rejected
+  const updateStatus = async(id,status)=>{
+ try{
+
+ await API.put(
+   `/applications/${id}`,
+   {status}
+ );
+
+ // refresh applicants list after update
+ setApplicants((prev)=>
+ prev.map((app)=>
+  app._id===id
+   ? {...app,status}
+   : app
+ )
+ );
+
+ }
+ catch(err){
+  console.log(err);
+ }
+}
+
   return (
 <div className="max-w-6xl mx-auto p-8">
 
@@ -170,6 +194,25 @@ Status:
 <span className="ml-2 text-blue-600 font-semibold">
 {app.status}
 </span>
+{app.status==="pending" && (
+<div className="mt-4 flex gap-4">
+
+<button
+onClick={()=>updateStatus(app._id,"accepted")}
+className="bg-green-600 text-white px-4 py-2 rounded-lg"
+>
+Accept
+</button>
+
+<button
+onClick={()=>updateStatus(app._id,"rejected")}
+className="bg-red-600 text-white px-4 py-2 rounded-lg"
+>
+Reject
+</button>
+
+</div>
+)}
 </p>
 
 </div>
